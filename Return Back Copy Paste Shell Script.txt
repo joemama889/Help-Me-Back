@@ -1,0 +1,24 @@
+$extension = ".dta"
+$file_path = "‪C:\Users\colet\OneDrive\Desktop\DPI2020_subset.dta"
+$temp_file_path = Join-Path -Path $env:TEMP -ChildPath "testfile$extension"
+
+# Create a blank file with the extension
+New-Item -ItemType File -Name "testfile$extension" -Path $env:TEMP | Out-Null
+
+# Set the default program to none for the file extension
+$null = cmd /c "ftype $extension="
+$null = cmd /c "assoc $extension=NoExtension"
+$null = cmd /c "ftype NoExtension=Check Here To Revert To Nothing Default"
+
+# Copy the file to the temporary file path
+Copy-Item -Path $file_path -Destination $temp_file_path -Force
+
+# Remove the association for the file extension
+$ext_key = "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\$extension"
+if (Test-Path $ext_key) {
+    Remove-Item -Path $ext_key -Recurse -Force
+}
+
+# Delete the temporary file
+Remove-Item -Path $temp_file_path -Force
+
